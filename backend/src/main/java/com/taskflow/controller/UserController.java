@@ -8,6 +8,8 @@ import java.util.List;
 import com.taskflow.dto.UserResponseDTO;
 import com.taskflow.dto.UserRequestDTO;
 import jakarta.validation.Valid;
+import com.taskflow.dto.LoginRequestDTO;
+import com.taskflow.dto.LoginResponseDTO;
 
 @RestController
 @RequestMapping("/api/users")
@@ -41,6 +43,10 @@ public List<User> getAllUsers() {
                            @RequestBody User user) {
 
         return userService.updateUser(id, user);
+    }
+    @PostMapping("/login")
+    public LoginResponseDTO loginUser(@Valid @RequestBody LoginRequestDTO loginRequestDTO) {
+        return userService.loginUser(loginRequestDTO);
     }
 
     @DeleteMapping("/{id}")

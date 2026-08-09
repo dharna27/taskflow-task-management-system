@@ -6,6 +6,7 @@ import com.taskflow.entity.Task;
 import com.taskflow.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.taskflow.exception.UnauthorizedTaskException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import com.taskflow.entity.User;
 import com.taskflow.repository.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
+import com.taskflow.exception.TaskNotFoundException;
 
 @Service
 public class TaskService {
@@ -94,10 +96,10 @@ public class TaskService {
         }
 
         Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Task not found"));
+                .orElseThrow(() -> new TaskNotFoundException("Task not found"));
 
         if (!task.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("You are not authorized to access this task");
+            throw new UnauthorizedTaskException("You are not authorized to access this task");
         }
 
         return new TaskResponseDTO(
@@ -124,10 +126,10 @@ public class TaskService {
         }
 
         Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Task not found"));
+                .orElseThrow(() -> new TaskNotFoundException("Task not found"));
 
         if (!task.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("You are not authorized to update this task");
+            throw new UnauthorizedTaskException("You are not authorized to update this task");
         }
 
         task.setTitle(request.getTitle());
@@ -161,10 +163,10 @@ public class TaskService {
         }
 
         Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Task not found"));
+                .orElseThrow(() -> new TaskNotFoundException("Task not found"));
 
         if (!task.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("You are not authorized to delete this task");
+            throw new UnauthorizedTaskException("You are not authorized to delete this task");
         }
 
         taskRepository.delete(task);

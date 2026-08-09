@@ -13,7 +13,7 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Map<String, String> handleValidationException(
+    public ResponseEntity<Map<String, String>> handleValidationException(
             MethodArgumentNotValidException ex) {
 
         Map<String, String> errors = new HashMap<>();
@@ -22,7 +22,9 @@ public class GlobalExceptionHandler {
                 errors.put(error.getField(), error.getDefaultMessage())
         );
 
-        return errors;
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(errors);
     }
     @ExceptionHandler(UnauthorizedTaskException.class)
     public ResponseEntity<Map<String, String>> handleUnauthorizedTask(

@@ -11,15 +11,30 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import com.taskflow.entity.User;
+import com.taskflow.repository.UserRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @Service
 public class TaskService {
 
     @Autowired
     private TaskRepository taskRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     // Create Task
     public TaskResponseDTO createTask(TaskRequestDTO request) {
+
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        User user = userRepository.findByEmail(email);
+
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
 
         Task task = new Task();
 
@@ -27,6 +42,7 @@ public class TaskService {
         task.setDescription(request.getDescription());
         task.setStatus(request.getStatus());
         task.setPriority(request.getPriority());
+        task.setUser(user);
 
         Task savedTask = taskRepository.save(task);
 
@@ -39,10 +55,20 @@ public class TaskService {
         );
     }
 
-    // Get All Tasks
+    // Get All Tasks for Logged-in User
     public List<TaskResponseDTO> getAllTasks() {
 
-        return taskRepository.findAll()
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        User user = userRepository.findByEmail(email);
+
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+
+        return taskRepository.findByUser(user)
                 .stream()
                 .map(task -> new TaskResponseDTO(
                         task.getId(),
@@ -57,8 +83,22 @@ public class TaskService {
     // Get Task By Id
     public TaskResponseDTO getTaskById(Long id) {
 
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        User user = userRepository.findByEmail(email);
+
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Task not found"));
+
+        if (!task.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("You are not authorized to access this task");
+        }
 
         return new TaskResponseDTO(
                 task.getId(),
@@ -70,10 +110,25 @@ public class TaskService {
     }
 
     // Update Task
+    // Update Task
     public TaskResponseDTO updateTask(Long id, TaskRequestDTO request) {
+
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        User user = userRepository.findByEmail(email);
+
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
 
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Task not found"));
+
+        if (!task.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("You are not authorized to update this task");
+        }
 
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
@@ -92,14 +147,42 @@ public class TaskService {
     }
 
     // Delete Task
+    // Delete Task
     public void deleteTask(Long id) {
 
-        taskRepository.deleteById(id);
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        User user = userRepository.findByEmail(email);
+
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+
+        if (!task.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("You are not authorized to delete this task");
+        }
+
+        taskRepository.delete(task);
     }
 
     public List<TaskResponseDTO> searchTasks(String title) {
 
-        return taskRepository.findByTitleContainingIgnoreCase(title)
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        User user = userRepository.findByEmail(email);
+
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+
+        return taskRepository.findByUserAndTitleContainingIgnoreCase(user, title)
                 .stream()
                 .map(task -> new TaskResponseDTO(
                         task.getId(),
@@ -112,7 +195,17 @@ public class TaskService {
     }
     public Page<TaskResponseDTO> getTasksWithPagination(int page, int size) {
 
-        return taskRepository.findAll(PageRequest.of(page, size))
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        User user = userRepository.findByEmail(email);
+
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+
+        return taskRepository.findByUser(user, PageRequest.of(page, size))
                 .map(task -> new TaskResponseDTO(
                         task.getId(),
                         task.getTitle(),

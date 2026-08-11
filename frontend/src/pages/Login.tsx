@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import axios from 'axios'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 function Login() {
     const [email, setEmail] = useState('')
@@ -42,71 +42,86 @@ function Login() {
     }
 
     return (
-        <div className="container mt-5">
-            <div className="row justify-content-center">
-                <div className="col-md-6">
+        <div className="auth-page">
 
-                    <div className="card shadow">
-                        <div className="card-body p-4">
+            <div className="auth-card">
 
-                            <h2 className="text-center mb-4">
-                                Login to TaskFlow
-                            </h2>
+                <div className="auth-logo">
+                    T
+                </div>
 
-                            {error && (
-                                <div className="alert alert-danger">
-                                    {error}
-                                </div>
-                            )}
+                <h1 className="auth-title">
+                    Welcome back
+                </h1>
 
-                            <form onSubmit={handleSubmit}>
+                <p className="auth-subtitle">
+                    Sign in to continue to TaskFlow
+                </p>
 
-                                <div className="mb-3">
-                                    <label className="form-label">
-                                        Email
-                                    </label>
+                {error && (
+                    <div className="alert-custom alert-error">
+                        {error}
+                    </div>
+                )}
 
-                                    <input
-                                        type="email"
-                                        className="form-control"
-                                        value={email}
-                                        onChange={(event) =>
-                                            setEmail(event.target.value)
-                                        }
-                                        required
-                                    />
-                                </div>
+                <form onSubmit={handleSubmit}>
 
-                                <div className="mb-3">
-                                    <label className="form-label">
-                                        Password
-                                    </label>
+                    <div className="auth-field">
 
-                                    <input
-                                        type="password"
-                                        className="form-control"
-                                        value={password}
-                                        onChange={(event) =>
-                                            setPassword(event.target.value)
-                                        }
-                                        required
-                                    />
-                                </div>
+                        <label className="auth-label">
+                            Email
+                        </label>
 
-                                <button
-                                    type="submit"
-                                    className="btn btn-primary w-100"
-                                >
-                                    Login
-                                </button>
+                        <input
+                            className="auth-input"
+                            type="email"
+                            placeholder="you@example.com"
+                            value={email}
+                            onChange={(event) =>
+                                setEmail(event.target.value)
+                            }
+                            required
+                        />
 
-                            </form>
-
-                        </div>
                     </div>
 
+                    <div className="auth-field">
+
+                        <label className="auth-label">
+                            Password
+                        </label>
+
+                        <input
+                            className="auth-input"
+                            type="password"
+                            placeholder="Enter your password"
+                            value={password}
+                            onChange={(event) =>
+                                setPassword(event.target.value)
+                            }
+                            required
+                        />
+
+                    </div>
+
+                    <button
+                        type="submit"
+                        className="primary-button"
+                    >
+                        Sign In
+                    </button>
+
+                </form>
+
+                <div className="auth-link">
+                    Don't have an account?{' '}
+                    <Link to="/register">
+                        Create one
+                    </Link>
                 </div>
+
             </div>
+
         </div>
     )
 }
